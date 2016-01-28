@@ -14,21 +14,22 @@ import java.util.Collection;
  * Created by ynikolaiko on 1/28/16.
  */
 @RestController
+@RequestMapping("/api")
 public class ElevatorController {
     @Autowired
     ElevatorManager elevatorManager;
 
-    @RequestMapping(value = "/floors", method = RequestMethod.GET)
+    @RequestMapping(value = "floors", method = RequestMethod.GET)
     Collection<Floor> getFloors() {
         return elevatorManager.getFloors();
     }
 
-    @RequestMapping(value = "/elevators", method = RequestMethod.GET)
+    @RequestMapping(value = "elevators", method = RequestMethod.GET)
     Collection<Elevator> getElevators() {
         return elevatorManager.getElevators();
     }
 
-    @RequestMapping(value = "/floors", method = RequestMethod.PUT)
+    @RequestMapping(value = "floors", method = RequestMethod.PUT)
     void getElevators(@RequestBody Floor floor) {
         elevatorManager.updateFloor(floor);
     }

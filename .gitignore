@@ -23,3 +23,7 @@ buildNumber.properties
 hs_err_pid*
 
 # Created by .ignore support plugin (hsz.mobi)
+
+node_modules/
+src/main/webapp/app/*.js
+src/main/webapp/app/*.map
