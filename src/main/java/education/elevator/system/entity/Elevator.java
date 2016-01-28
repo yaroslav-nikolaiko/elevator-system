@@ -1,6 +1,5 @@
 package education.elevator.system.entity;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,36 +18,38 @@ public class Elevator {
     volatile Integer currentLevel = 0;
 
     public void run(Floor floor) {
-        travelToLevel(floor.getLevel());
+        travel(floor.getLevel());
         Integer destinationLevel = floor.getDestinationLevel();
-        int canTake = floor.getPeople() - capacity;
-        canTake = canTake < 0 ? floor.getPeople() : canTake;
+        int canTake = canTakePeople(floor);
         floor.setPeople(floor.getPeople() - canTake);
         this.people = canTake;
-        travelToLevel(destinationLevel);
+        travel(destinationLevel);
         this.people = 0;
     }
 
-    void travelToLevel(Integer level) {
+    void travel(Integer level) {
         if(currentLevel - level > 0){
             status = ElevatorStatus.DOWN;
-            for(; currentLevel>= level; currentLevel--)
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            for(; currentLevel >= level; currentLevel--)
+                mockPhysicalMovement();
         }
         else {
             status = ElevatorStatus.UP;
-            for(; currentLevel<= level; currentLevel++)
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            for(; currentLevel <= level; currentLevel++)
+                mockPhysicalMovement();
         }
-
         status = ElevatorStatus.IDLE;
+    }
+
+    int canTakePeople(Floor floor) {
+        return floor.getPeople() < capacity ? floor.getPeople() : capacity;
+    }
+
+    void mockPhysicalMovement() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
