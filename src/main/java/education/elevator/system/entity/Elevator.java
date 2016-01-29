@@ -4,6 +4,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by ynikolaiko on 1/28/16.
  */
@@ -14,31 +16,31 @@ public class Elevator {
     final static Integer capacity = 20;
     final String name;
     volatile ElevatorStatus status = ElevatorStatus.IDLE;
-    volatile Integer people = 0;
-    volatile Integer currentLevel = 0;
+    AtomicInteger people = new AtomicInteger(0);
+    AtomicInteger currentLevel = new AtomicInteger(1);
 
     public void run(Floor floor) {
         travel(floor.getLevel());
         Integer destinationLevel = floor.getDestinationLevel();
         int canTake = canTakePeople(floor);
         floor.setPeople(floor.getPeople() - canTake);
-        this.people = canTake;
+        people.set(canTake);
         travel(destinationLevel);
-        this.people = 0;
+        people.set(0);
+        status = ElevatorStatus.IDLE;
     }
 
     void travel(Integer level) {
-        if(currentLevel - level > 0){
+        if(currentLevel.get() - level > 0){
             status = ElevatorStatus.DOWN;
-            for(; currentLevel >= level; currentLevel--)
+            for(; currentLevel.get() > level; currentLevel.decrementAndGet())
                 mockPhysicalMovement();
         }
         else {
             status = ElevatorStatus.UP;
-            for(; currentLevel <= level; currentLevel++)
+            for(; currentLevel.get() < level; currentLevel.incrementAndGet())
                 mockPhysicalMovement();
         }
-        status = ElevatorStatus.IDLE;
     }
 
     int canTakePeople(Floor floor) {
@@ -47,7 +49,7 @@ public class Elevator {
 
     void mockPhysicalMovement() {
         try {
-            Thread.sleep(2000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
