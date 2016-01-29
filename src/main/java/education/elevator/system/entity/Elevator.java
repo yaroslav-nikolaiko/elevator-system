@@ -3,6 +3,8 @@ package education.elevator.system.entity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -13,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 @Getter
 public class Elevator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Elevator.class);
     final static Integer capacity = 20;
     final String name;
     volatile ElevatorStatus status = ElevatorStatus.IDLE;
@@ -33,13 +36,17 @@ public class Elevator {
     void travel(Integer level) {
         if(currentLevel.get() - level > 0){
             status = ElevatorStatus.DOWN;
-            for(; currentLevel.get() > level; currentLevel.decrementAndGet())
+            for(; currentLevel.get() > level; currentLevel.decrementAndGet()){
+                LOGGER.info("Elevator "+name+" level "+currentLevel.get());
                 mockPhysicalMovement();
+            }
         }
         else {
             status = ElevatorStatus.UP;
-            for(; currentLevel.get() < level; currentLevel.incrementAndGet())
+            for(; currentLevel.get() < level; currentLevel.incrementAndGet()){
+                LOGGER.info("Elevator "+name+" level "+currentLevel.get());
                 mockPhysicalMovement();
+            }
         }
     }
 
