@@ -18,5 +18,19 @@
     </tr>
 </table>
 <div style="width:40%; float: right">
-    <elevators></elevators>
+    <h2>Elevators</h2>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>People</th>
+            <th>Current Level</th>
+        </tr>
+        <tr *ngFor="#elevator of elevators">
+            <td>{{elevator.name}}</td>
+            <td>{{elevator.status}}</td>
+            <td>{{elevator.people}}</td>
+            <td>{{elevator.currentLevel}}</td>
+        </tr>
+    </table>
 </div>
