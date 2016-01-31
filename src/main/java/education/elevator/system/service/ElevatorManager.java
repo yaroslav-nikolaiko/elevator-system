@@ -58,10 +58,10 @@ public class ElevatorManager implements Runnable {
             Floor floor = nextFloor();
             Elevator elevator = requestElevator(floor);
             elevator.run(floor,
-                    () -> elevatorsPool.add(elevator),
                     () -> {
                         if(floor.getPeople()>0) levelsQueue.add(floor.getLevel());
-                    });
+                    },
+                    () -> elevatorsPool.add(elevator));
         }
     }
 
