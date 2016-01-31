@@ -9,7 +9,7 @@ import {ElevatorService} from './elevator.service';
 })
 export class ElevatorComponent {
     public elevators: Elevator[];
-    constructor(private _elevatorService: ElevatorService) { }
+    constructor(private _elevatorService: ElevatorService, private window: Window) { }
     getElevators() {
         this._elevatorService.getElevators().subscribe(
             elevators => this.elevators = elevators,
@@ -17,6 +17,7 @@ export class ElevatorComponent {
     }
 
     ngOnInit() {
-        this.getElevators();
+        var self = this;
+        window.setInterval(()=>self.getElevators(), 1000);
     }
 }

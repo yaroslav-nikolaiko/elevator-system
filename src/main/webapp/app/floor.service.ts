@@ -18,10 +18,7 @@ export class FloorService {
         console.log("Update Floor" +floor);
         var headers = new Headers();
         headers.append('Content-Type', 'application/json');
-        var options = new RequestOptions({
-            headers: headers
-        });
-        this.http.put("api/floors", JSON.stringify({ floor }),options).subscribe(
+        this.http.put("api/floors", JSON.stringify(floor), {headers : headers}).subscribe(
             response => console.log(response));
     }
 
