@@ -1,15 +1,15 @@
 package education.elevator.system.service;
 
 import education.elevator.system.entity.Elevator;
-import education.elevator.system.entity.ElevatorStatus;
 import education.elevator.system.entity.Floor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by ynikolaiko on 1/28/16.
@@ -19,20 +19,22 @@ public class ElevatorManager implements Runnable {
     static final int ELEVATORS=4;
     static final int FLOORS=10;
     Set<Elevator> elevatorsPool = Collections.newSetFromMap(new ConcurrentHashMap<>(ELEVATORS));
+    List<Elevator> elevators = new ArrayList<>(ELEVATORS);
     BlockingQueue<Integer> levelsQueue = new LinkedBlockingQueue<>(FLOORS);
     ConcurrentHashMap<Integer, Floor> floors = new ConcurrentHashMap<>(FLOORS);
-    ExecutorService elevatorsThreadPool;
 
 
     public ElevatorManager(){
-        elevatorsThreadPool = Executors.newFixedThreadPool(ELEVATORS);
         initializeFloors();
         initializeElevators();
     }
 
     @PostConstruct
-    void start(){
-        new Thread(this).start();
+    synchronized void start() {
+        initFloorsQueue();
+        Thread simulatorThread = new Thread(this, "Elevator Simulator Thread");
+        simulatorThread.setUncaughtExceptionHandler((thread, ex) -> start());
+        simulatorThread.start();
     }
 
     public Collection<Floor> getFloors() {
@@ -40,7 +42,7 @@ public class ElevatorManager implements Runnable {
     }
 
     public Collection<Elevator> getElevators() {
-        return elevatorsPool;
+        return elevators;
     }
 
     public void updateFloor(Floor floor) {
@@ -55,7 +57,11 @@ public class ElevatorManager implements Runnable {
         for(;;){
             Floor floor = nextFloor();
             Elevator elevator = requestElevator(floor);
-            elevatorsThreadPool.execute(() -> elevator.run(floor));
+            elevator.run(floor,
+                    () -> elevatorsPool.add(elevator),
+                    () -> {
+                        if(floor.getPeople()>0) levelsQueue.add(floor.getLevel());
+                    });
         }
     }
 
@@ -86,11 +92,10 @@ public class ElevatorManager implements Runnable {
 
     Elevator getAvailableElevator(Floor floor) {
         Integer level = floor.getLevel();
-        return  elevatorsPool.stream()
-                .filter(elevator -> elevator.getStatus() == ElevatorStatus.IDLE)
-                .sorted((e1, e2) -> Math.abs(level - e1.getCurrentLevel().get()) - Math.abs(level - e2.getCurrentLevel().get()))
-                .findFirst()
-                .orElse(null);
+        //if(elevatorsPool.isEmpty()) return null;
+        Elevator elevator = Collections.min(elevatorsPool,
+                (e1, e2) -> abs(level - e1.getCurrentLevel()) - abs(level - e2.getCurrentLevel()));
+        return elevatorsPool.remove(elevator) ? elevator : null;
     }
 
     private void initializeFloors() {
@@ -99,9 +104,19 @@ public class ElevatorManager implements Runnable {
     }
 
     private void initializeElevators() {
-        elevatorsPool.add(new Elevator("A"));
-        elevatorsPool.add(new Elevator("B"));
-        elevatorsPool.add(new Elevator("C"));
-        elevatorsPool.add(new Elevator("D"));
+        elevators.add(new Elevator("A"));
+        elevators.add(new Elevator("B"));
+        elevators.add(new Elevator("C"));
+        elevators.add(new Elevator("D"));
+
+        elevatorsPool.addAll(elevators);
+    }
+
+    public void initFloorsQueue() {
+        levelsQueue.clear();
+        levelsQueue.addAll(floors.entrySet().stream()
+                .filter(e->e.getValue().getPeople() > 0)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet()));
     }
 }
