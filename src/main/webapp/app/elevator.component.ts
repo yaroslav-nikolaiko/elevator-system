@@ -9,15 +9,16 @@ import {ElevatorService} from './elevator.service';
 })
 export class ElevatorComponent {
     public elevators: Elevator[];
+    private timerId: number;
     constructor(private _elevatorService: ElevatorService, private window: Window) { }
     getElevators() {
         this._elevatorService.getElevators().subscribe(
             elevators => this.elevators = elevators,
-            error => alert(`Server error. Try again later`));
+            error => window.clearInterval(this.timerId));
     }
 
     ngOnInit() {
         var self = this;
-        window.setInterval(()=>self.getElevators(), 1000);
+        this.timerId = window.setInterval(()=>self.getElevators(), 1000);
     }
 }

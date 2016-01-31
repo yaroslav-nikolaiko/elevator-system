@@ -15,11 +15,9 @@ export class FloorService {
     }
 
     update(floor: Floor){
-        console.log("Update Floor" +floor);
         var headers = new Headers();
         headers.append('Content-Type', 'application/json');
-        this.http.put("api/floors", JSON.stringify(floor), {headers : headers}).subscribe(
-            response => console.log(response));
+        this.http.put("api/floors", JSON.stringify(floor), {headers : headers});
     }
 
     private logAndPassOn (error: Error) {
