@@ -1,0 +1,21 @@
+<h1>{{title}}</h1>
+<h2>Floors</h2>
+<table style="width:40%; float: left">
+    <tr>
+        <th>Level</th>
+        <th>People</th>
+        <th>Destination</th>
+    </tr>
+    <tr *ngFor="#floor of floors">
+        <td>{{floor.level}}</td>
+        <td>
+            <input [(ngModel)]="floor.people" (keyup.enter)="onSelect(floor)" placeholder="people"/>
+        </td>
+        <td>
+            <input [(ngModel)]="floor.destinationLevel" (keyup.enter)="onSelect(floor)" placeholder="destinationLevel"/>
+        </td>
+    </tr>
+</table>
+<div style="width:40%; float: right">
+    <elevators></elevators>
+</div>
